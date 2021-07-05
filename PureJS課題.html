@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>double clock</title>
+    <style>
+      .container {
+        border-radius: 100%;
+        width: 65%;
+        margin: auto;
+        height: 100vh;
+        background-color: #15151e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+
+      /* 時計の共通スタイル */
+      .clock {
+        font-family: 'Share Tech Mono', monospace;
+        color: #daf6ff;
+        text-shadow: 0 0 20px #0aafe6;
+      }
+
+      /* 日付のスタイル */
+      .clock-date {
+        font-size: 2vw;
+        position: absolute;
+        top: 27%;
+        left: 45%;
+      }
+
+      /* 時間のスタイル */
+      .clock-time {
+        font-size: 2vw;
+        position: absolute;
+        top: 65%;
+        left: 46%;
+      }
+
+      .c-clock {
+        font-family: 'Share Tech Mono', monospace;
+        color: #daf6ff;
+        text-shadow: 0 0 20px #0aafe6;
+        line-height: 1.2;
+        text-align: center;
+      }
+      .c-clock__hour {
+        position: absolute;
+        top: calc(50% - 130px);
+        left: calc(50% - 5px);
+        width: 10px;
+        height: 130px;
+        background: #82c2d8;
+        transform-origin: bottom;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px 0 #0aafe6;
+      }
+      .c-clock__min {
+        position: absolute;
+        top: calc(50% - 150px);
+        left: calc(50% - 2px);
+        width: 4px;
+        height: 150px;
+        background: #82c2d8;
+        transform-origin: bottom;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px 0 #0aafe6;
+      }
+      .c-clock__sec {
+        position: absolute;
+        top: calc(50% - 150px);
+        left: calc(50% - 1px);
+        width: 2px;
+        height: 150px;
+        background: #ff0000;
+        transform-origin: bottom;
+        border-radius: 10px;
+      }
+      .c-clock__12 {
+        position: absolute;
+        top: 10%;
+        left: calc(50%);
+        transform: translateX(-50%);
+        font-size: 25px;
+      }
+      .c-clock__3 {
+        position: absolute;
+        top: 50%;
+        right: 25%;
+        transform: translateY(-50%);
+        font-size: 25px;
+      }
+      .c-clock__6 {
+        position: absolute;
+        bottom: 10%;
+        left: calc(50%);
+        transform: translateX(-50%);
+        font-size: 25px;
+      }
+      .c-clock__9 {
+        position: absolute;
+        top: 50%;
+        left: 25%;
+        transform: translateY(-50%);
+        font-size: 25px;
+      }
+      .btn {
+        font-size: 5px;
+        position: absolute;
+        top: 69%;
+        left: 59%;
+      }
+      #container {
+        position: absolute;
+        top: 69%;
+        left: 35%;
+        width: 100%;
+        height: 25%;
+      }
+      #disp {
+        color: #82c2d8;
+        text-shadow: 0 0 20px #0aafe6;
+        font-size: 5px;
+      }
+      #mask {
+        color: rgb(247, 126, 126);
+        text-shadow: 0 0 20px #0aafe6;
+        font-size: 5px;
+      }
+      li {
+        list-style: none;
+      }
+      #log {
+        position: absolute;
+        top: 69%;
+        left: 46%;
+        color: #82c2d8;
+        text-shadow: 0 0 20px #0aafe6;
+        width: 350px;
+        height: 25%;
+        display: inline-flex;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="clock">
+        <p class="clock-date"></p>
+        <p id="clock-time-id" class="clock-time"></p>
+      </div>
+    </div>
+
+    <div class="c-clock">
+      <span class="c-clock__hour"></span>
+      <!-- 時計 -->
+      <span class="c-clock__min"></span>
+      <!-- 分針 -->
+      <span class="c-clock__sec"></span>
+      <!-- 秒針 -->
+      <span class="c-clock__12">12</span>
+      <!-- 時計文字 -->
+      <span class="c-clock__3">3</span>
+      <!-- 時計文字 -->
+      <span class="c-clock__6">6</span>
+      <!-- 時計文字 -->
+      <span class="c-clock__9">9</span>
+      <!-- 時計文字 -->
+    </div>
+    <ul id="parent-btn">
+      <li class="btn">
+        <button id="btn1">stop watch</button>
+      </li>
+    </ul>
+  </body>
+  <script>
+    const clock = () => {
+      // 現在の日時・時刻の情報を取得
+      const d = new Date();
+
+      // 月を取得
+      let month = d.getMonth() + 1;
+      // 日を取得
+      let date = d.getDate();
+      // 曜日を取得
+      let dayNum = d.getDay();
+      const weekday = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+      let day = weekday[dayNum];
+      // 時を取得
+      let hour = d.getHours();
+      // 分を取得
+      let min = d.getMinutes();
+      // 秒を取得
+      let sec = d.getSeconds();
+
+      // 1桁の場合は0を足して2桁に
+      month = month < 10 ? '0' + month : month;
+      date = date < 10 ? '0' + date : date;
+      hour = hour < 10 ? '0' + hour : hour;
+      min = min < 10 ? '0' + min : min;
+      sec = sec < 10 ? '0' + sec : sec;
+
+      // 日付・時刻の文字列を作成
+      let today = `${month}.${date} ${day}`;
+      let time = `${hour}:${min}:${sec}`;
+
+      // 文字列を出力
+      document.querySelector('.clock-date').innerText = today;
+      document.querySelector('.clock-time').innerText = time;
+    };
+
+    // 1秒ごとにclock関数を呼び出す
+    setInterval(clock, 1000);
+
+    setInterval(() => {
+      // 現在時間の取得
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+
+      // 時、分、秒を元に角度を計算
+      const degH = h * (360 / 12) + m * (360 / 12 / 60);
+      const degM = m * (360 / 60);
+      const degS = s * (360 / 60);
+
+      // 各要素を取得
+      const elementH = document.querySelector('.c-clock__hour');
+      const elementM = document.querySelector('.c-clock__min');
+      const elementS = document.querySelector('.c-clock__sec');
+
+      // styleを追加
+      elementH.style.transform = `rotate(${degH}deg)`;
+      elementM.style.transform = `rotate(${degM}deg)`;
+      elementS.style.transform = `rotate(${degS}deg)`;
+    }, 10);
+
+    // ボタン切り替え
+    const onClickChange = () => {
+      // btn1削除
+      document.getElementById('btn1').remove();
+      document.getElementById('clock-time-id').remove();
+
+      // // ストップウォッチのli生成
+      const li2 = document.createElement('li');
+      li2.id = 'container';
+      document.getElementById('parent-btn').appendChild(li2);
+      const div2 = document.createElement('div');
+      div2.id = 'mask';
+      const div3 = document.createElement('div');
+      div3.id = 'lap';
+      const div4 = document.createElement('div');
+      div4.id = 'disp';
+      div4.innerText = '0:00:00.000 / 0:00:00.000';
+      const div5 = document.createElement('div');
+      div5.className = 'button';
+      const input = document.createElement('input');
+      input.type = 'button';
+      input.id = 'start';
+      input.value = 'START';
+      const input2 = document.createElement('input');
+      input2.type = 'button';
+      input2.id = 'reset';
+      input2.value = 'RESET';
+
+      li2.appendChild(div2);
+      div2.appendChild(div3);
+      li2.appendChild(div4);
+      li2.appendChild(div5);
+      div5.appendChild(input);
+      div5.appendChild(input2);
+
+      // 切り替えボタンのli生成
+      const li = document.createElement('li');
+      li.className = 'btn';
+
+      // btn2生成
+      const button2 = document.createElement('button');
+      button2.id = 'btn2';
+      button2.innerText = '3m timer';
+      // liにbutton2を入れる
+      li.appendChild(button2);
+
+      // btn2追加
+      document.getElementById('parent-btn').appendChild(li);
+
+      const lapCount = 200; // ラップ保持数
+      let lapNum = 1;
+
+      const storage = getStorage();
+
+      let state = storage.state ?? 0, // 動作状態
+        startTime = storage.startTime ?? 0, // スタートタイム
+        stopTime = storage.stopTime ?? 0, // ストップタイム
+        lapTime = storage.lapTime ?? 0, // ラップスタートタイム
+        lapStopTime = storage.lapStopTime ?? 0, // ラップストップタイム
+        id; // setInterval ID
+
+      onload = function () {
+        // localStorageに動作状態が保存されていた場合は動作状態復元
+        if (state === 1) {
+          if ((id = setInterval(printTime, 1))) {
+            document.querySelector('#start').value = 'STOP';
+            document.querySelector('#reset').value = 'LAP';
+          }
+          setStorage();
+        }
+      };
+
+      const eventHandlerType =
+        window.ontouchstart !== undefined ? 'touchstart' : 'mousedown';
+
+      // START押下時イベント
+      document.querySelector('#start').addEventListener(
+        eventHandlerType,
+        function () {
+          // 停止中
+          if (state === 0) {
+            // カウント開始
+            if ((id = startCount())) {
+              // ボタンのラベル変更
+              document.querySelector('#start').value = 'STOP';
+              document.querySelector('#reset').value = 'LAP';
+              // 動作状態を変更
+              state = 1;
+              setStorage();
+            }
+          }
+          // 動作中
+          else {
+            // カウントインターバルが動作中
+            if (id) {
+              // インターバル停止
+              clearInterval(id);
+              // カウント停止
+              stopCount();
+              // ボタンのラベルを戻す
+              document.querySelector('#start').value = 'START';
+              document.querySelector('#reset').value = 'RESET';
+              // 動作状態を変更
+              state = 0;
+              deleteStorage();
+            }
+          }
+        },
+        false
+      );
+
+      // RESET押下時イベント
+      document.querySelector('#reset').addEventListener(
+        eventHandlerType,
+        function () {
+          // 停止中ならリセット
+          if (state === 0) {
+            stopTime = 0;
+            lapStopTime = 0;
+            // 表示初期化
+            document.querySelector('#lap').innerHTML = '';
+            document.querySelector('#disp').textContent =
+              '0:00:00.000 / 0:00:00.000';
+          }
+          // 動作中ならLAP動作
+          else {
+            // #lap内の最後にdiv要素追加
+            document
+              .querySelector('#lap')
+              .appendChild(document.createElement('div'));
+
+            // 追加した要素に経過時間表示
+            document.querySelector('#lap>div:last-of-type').textContent =
+              lapNum++ + ' : ' + getTimeString();
+
+            lapTime = Date.now();
+
+            // lap保持数を超えたら先頭の子要素を削除
+            if (document.querySelector('#lap').childElementCount > lapCount)
+              document
+                .querySelector('#lap')
+                .removeChild(document.querySelector('#lap').childNodes[0]);
+
+            // スクロール位置を最下部に
+            document.querySelector('#lap').scrollTop =
+              document.querySelector('#lap').scrollHeight;
+
+            setStorage();
+          }
+        },
+        false
+      );
+
+      // カウント開始
+      function startCount() {
+        const now = Date.now();
+        startTime = now - stopTime;
+        lapTime = now - lapStopTime;
+        return setInterval(printTime, 1);
+      }
+
+      // カウント停止
+      function stopCount() {
+        const now = Date.now();
+        stopTime = now - startTime;
+        lapStopTime = now - lapTime;
+      }
+
+      // 経過時間表示
+      function printTime() {
+        document.querySelector('#disp').textContent = getTimeString();
+      }
+
+      function getTimeString() {
+        const now = Date.now(),
+          time = now - startTime,
+          splitTime = now - lapTime,
+          main =
+            Math.floor(time / 3600000) +
+            ':' +
+            String(Math.floor(time / 60000) % 60).padStart(2, '0') +
+            ':' +
+            String(Math.floor(time / 1000) % 60).padStart(2, '0') +
+            '.' +
+            String(time % 1000).padStart(3, '0'),
+          split =
+            Math.floor(splitTime / 3600000) +
+            ':' +
+            String(Math.floor(splitTime / 60000) % 60).padStart(2, '0') +
+            ':' +
+            String(Math.floor(splitTime / 1000) % 60).padStart(2, '0') +
+            '.' +
+            String(splitTime % 1000).padStart(3, '0');
+
+        return main + ' / ' + split;
+      }
+
+      // localStorage保存
+      function setStorage() {
+        localStorage.setItem(
+          'stopwatch_params',
+          JSON.stringify({
+            state: state,
+            startTime: startTime,
+            stopTime: stopTime,
+            lapTime: lapTime,
+            lapStopTime: lapStopTime,
+          })
+        );
+      }
+
+      // localStorage削除
+      function deleteStorage() {
+        localStorage.removeItem('stopwatch_params');
+      }
+
+      // localStorage取得
+      function getStorage() {
+        const params = localStorage.getItem('stopwatch_params');
+        return params ? JSON.parse(params) : {};
+      }
+
+      // btn2にクリックイベント付与
+      button2.addEventListener('click', () => {
+        // btn2削除
+        document.getElementById('btn2').remove();
+
+        // ストップウォッチ削除(ul id="parent-btn")
+        document.getElementById('disp').remove();
+        document.getElementById('start').remove();
+        document.getElementById('reset').remove();
+
+        // タイマー生成
+        const div7 = document.createElement('div');
+        div7.id = 'log';
+        document.getElementById('parent-btn').appendChild(div7);
+
+        // div生成
+        const li = document.createElement('li');
+        li.className = 'btn';
+
+        // btn3生成
+        const button3 = document.createElement('button');
+        button3.id = 'btn3';
+        button3.innerText = 'Default';
+
+        // divにbutton3を入れる
+        li.appendChild(button3);
+
+        // btn3追加
+        document.getElementById('parent-btn').appendChild(li);
+
+        const totalTime = 180000;
+        const oldTime = Date.now();
+
+        const timeId = setInterval(() => {
+          const currentTime = Date.now();
+
+          // 差分を求める
+          const diff = currentTime - oldTime;
+
+          const diffSec = totalTime - diff;
+
+          //ミリ秒を整数に変換
+          const remainSec = Math.ceil(diffSec / 1000);
+
+          let text = `残り${remainSec}秒`;
+
+          // 0秒以下になったら
+          if (diffSec <= 0) {
+            clearInterval(timeId);
+
+            // タイマー終了の文言を表示する
+            text = '終了';
+          }
+
+          // 画面に表示する
+          document.querySelector('#log').innerHTML = text;
+        });
+
+        button3.addEventListener('click', () => {
+          window.location.reload();
+        });
+      });
+    };
+
+    document
+      .getElementById('btn1')
+      .addEventListener('click', () => onClickChange());
+  </script>
+</html>
